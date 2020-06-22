@@ -1,19 +1,36 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import EventInput from './components/EventInput'
 import EventList from './components/EventList'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {v1 as uuid} from 'uuid'
+import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react'
+import {Auth, Hub} from "aws-amplify";
+import '@aws-amplify/ui/dist/style.css';
+
 class App extends Component{
   state = {
+    loggedinUser: "Dummy",
     isLoading:false,
     items:[
       {
         "id": "1",
-        "title": "default item"
+        "user": "test",
+        "title": "default item",
+        "status": "Idle",
+        "schedule": {
+          "start_time": "string",
+          "stop_time": "string"
+        }
       },
       {
         "id": "2",
-        "title": "default item 2"
+        "user": "test2",
+        "title": "default item 2",
+        "status": "Idle",
+        "schedule": {
+          "start_time": "string",
+          "stop_time": "string"
+        }
       }
     ],
     id:uuid(),
@@ -63,6 +80,33 @@ class App extends Component{
       editItem: true
     });
   }
+  setUserName = () => { //not able to call this ##### Fix later IMP!!!!!!! TODO
+    // in useEffect, we create the listener
+    useEffect(() => {
+      Hub.listen('auth', (data) => {
+        const { payload } = data
+        console.log('A new auth event has happened: ', data)
+        if (payload.event === 'signIn') {
+          this.setState.loggedinUser = Auth.currentAuthenticatedUser()
+          .then(user => user.getUsername().toString())
+          .catch(err => console.log(err))
+          console.log('a user has signed in!')
+        }
+        if (payload.event === 'signOut') {
+          console.log('a user has signed out!')
+        }
+      })
+    })
+  }
+
+  async componentDidMount() {
+    const response = await fetch(
+      "https://e106ldopga.execute-api.us-west-1.amazonaws.com/Dev"
+    );
+    const body = await response.json();
+    this.setState({ items: body, isLoading: false });
+  }
+  
   render(){
     const isLoading = this.state.isLoading;
     const allItems = this.state.items;
@@ -70,10 +114,15 @@ class App extends Component{
       return(<div>Loading...</div>);
     return(
       <div className="container">
+        <AmplifySignOut />
         <div className="row">
           <div className="col-10 ex-auto col-md-8 mt-4">
+    <h1>Hi, {this.state.loggedinUser}</h1>
             <h3 className="text-capitalize text-center">
               Event Input
+              {console.log(Auth.currentAuthenticatedUser()
+    .then(user => console.log({ user }))
+    .catch(err => console.log(err)))}
             </h3>
             <EventInput 
             item={this.state.item} 
@@ -91,7 +140,7 @@ class App extends Component{
     );
   }
 }
-export default App;
+export default withAuthenticator(App)
 
 // function App() {
 //   return (
