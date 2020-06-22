@@ -101,7 +101,7 @@ class App extends Component{
 
   async componentDidMount() {
     const response = await fetch(
-      "https://e106ldopga.execute-api.us-west-1.amazonaws.com/Dev"
+      "https://3x2owagrv4.execute-api.us-east-2.amazonaws.com/Dev/"
     );
     const body = await response.json();
     this.setState({ items: body, isLoading: false });
