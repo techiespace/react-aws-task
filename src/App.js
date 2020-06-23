@@ -46,8 +46,12 @@ class App extends Component{
     e.preventDefault();
     const newItem = {
       id: this.state.id,
-      title: this.state.item
+      title: this.state.item,
+      user: this.state.loggedinUser,
     };
+    const currId = newItem.id;
+    const currTitle = newItem.item;
+    const currUser = newItem.user;
     const updatedItems = [...this.state.items,newItem];
     this.setState({
       items: updatedItems,
@@ -55,6 +59,12 @@ class App extends Component{
       id: uuid(),
       editItem: false
     });
+    //add to dynamo db
+    (async() => {
+      await fetch(
+        "https://3x2owagrv4.execute-api.us-east-2.amazonaws.com/Dev/?id="+currId+"&title="+currTitle+"&user="+currUser
+      );
+    })();
   }
   clearList = () => {
     this.setState({
@@ -80,8 +90,9 @@ class App extends Component{
       editItem: true
     });
   }
-  setUserName = () => { //not able to call this ##### Fix later IMP!!!!!!! TODO
+  async setUserName() { //not able to call this ##### Fix later IMP!!!!!!! TODO
     // in useEffect, we create the listener
+    console.log('inside setuserName funct')
     useEffect(() => {
       Hub.listen('auth', (data) => {
         const { payload } = data
@@ -105,6 +116,10 @@ class App extends Component{
     );
     const body = await response.json();
     this.setState({ items: body, isLoading: false });
+    const tempUserName = await Auth.currentAuthenticatedUser()
+    .then(user => user.getUsername().toString())
+    .catch(err => console.log(err))
+    this.setState({loggedinUser : tempUserName});
   }
   
   render(){
@@ -120,9 +135,6 @@ class App extends Component{
     <h1>Hi, {this.state.loggedinUser}</h1>
             <h3 className="text-capitalize text-center">
               Event Input
-              {console.log(Auth.currentAuthenticatedUser()
-    .then(user => console.log({ user }))
-    .catch(err => console.log(err)))}
             </h3>
             <EventInput 
             item={this.state.item} 
@@ -130,7 +142,8 @@ class App extends Component{
             handleSubmit={this.handleSubmit}
             editItem={this.state.editItem}/>
             <EventList 
-            items={this.state.items} 
+            items={this.state.items}
+            user={this.state.loggedinUser} 
             clearList={this.clearList} 
             handleDelete={this.handleDelete}
             handleEdit={this.handleEdit}/>
