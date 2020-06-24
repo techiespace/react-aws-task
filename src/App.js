@@ -61,8 +61,23 @@ class App extends Component{
     });
     //add to dynamo db
     (async() => {
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          "id": currId,
+          "user": currUser,
+          "title": currTitle,
+          "status": "dummy_status",
+          "schedule": {
+            "start_time": "dummy_starttime",
+            "stop_time": "dummy_endtime"
+          }
+        })
+    };
       await fetch(
-        "https://3x2owagrv4.execute-api.us-east-2.amazonaws.com/Dev/?id="+currId+"&title="+currTitle+"&user="+currUser
+        "https://3x2owagrv4.execute-api.us-east-2.amazonaws.com/Stg/events",
+        requestOptions
       );
     })();
   }
