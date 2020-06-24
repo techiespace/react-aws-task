@@ -112,10 +112,26 @@ class App extends Component{
 
   async componentDidMount() {
     const response = await fetch(
-      "https://3x2owagrv4.execute-api.us-east-2.amazonaws.com/Dev/"
+      "https://3x2owagrv4.execute-api.us-east-2.amazonaws.com/Stg/events"
     );
     const body = await response.json();
-    this.setState({ items: body, isLoading: false });
+    var fetchedItems = []
+    for(var currItem in body.body){
+      fetchedItems.push(
+        {
+          "id": currItem.id,
+          "user": currItem.user,
+          "title": currItem.title,
+          "status": currItem.status,
+          "schedule": {
+            "start_time": currItem.schedule?currItem.schedule.start_time:null,
+            "stop_time": currItem.schedule?currItem.schedule.end_time:null
+          }
+        }
+      );
+    }
+    if(body.body!==undefined && body.body !== null && body.body.user !== undefined)
+      this.setState({ items: fetchedItems, isLoading: false });
     const tempUserName = await Auth.currentAuthenticatedUser()
     .then(user => user.getUsername().toString())
     .catch(err => console.log(err))

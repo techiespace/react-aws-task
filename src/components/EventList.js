@@ -7,7 +7,15 @@ export default class EventList extends Component {
             <ul className="list-group my-5">
                 <h3 className="text-capitalize text-center">Event List</h3>
                 {
-                    items.filter(function(itm) {                        
+                    // <EventItem 
+                    // key={items[0].id} 
+                    // title={items[0].title}
+                    // handleDelete={() => handleDelete(items[0].id)}
+                    // handleEdit={() => handleEdit(items[0].id)}/>
+                    (items||[]).filter(function(itm) {
+                        if(typeof(itm) === undefined)
+                            return false;
+                        
                         if(itm['user']===user)
                             return true;
                         return false;
