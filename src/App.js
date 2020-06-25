@@ -50,7 +50,7 @@ class App extends Component{
       user: this.state.loggedinUser,
     };
     const currId = newItem.id;
-    const currTitle = newItem.item;
+    const currTitle = newItem.title;
     const currUser = newItem.user;
     const updatedItems = [...this.state.items,newItem];
     this.setState({
@@ -131,21 +131,25 @@ class App extends Component{
     );
     const body = await response.json();
     var fetchedItems = []
-    for(var currItem in body.body){
+    var responseItems = JSON.parse(body.body)
+    for(var currItem in responseItems){
       fetchedItems.push(
         {
-          "id": currItem.id,
-          "user": currItem.user,
-          "title": currItem.title,
-          "status": currItem.status,
+          "id": responseItems[currItem].id,
+          "user": responseItems[currItem].user,
+          "title": responseItems[currItem].title,
+          "status": responseItems[currItem].status,
           "schedule": {
-            "start_time": currItem.schedule?currItem.schedule.start_time:null,
-            "stop_time": currItem.schedule?currItem.schedule.end_time:null
+            "start_time": (responseItems[currItem].schedule !== undefined && responseItems[currItem].schedule !== null)?responseItems[currItem].schedule.start_time:"default",
+            "stop_time": (responseItems[currItem].schedule !== undefined && responseItems[currItem].schedule !== null)?responseItems[currItem].schedule.end_time:"default"
           }
         }
       );
     }
-    if(body.body!==undefined && body.body !== null && body.body.user !== undefined)
+    console.log(fetchedItems)
+    console.log(responseItems)
+    //console.log(JSON.parse(body.body))
+    if(responseItems!==undefined && responseItems !== null && responseItems[0].user !== undefined)
       this.setState({ items: fetchedItems, isLoading: false });
     const tempUserName = await Auth.currentAuthenticatedUser()
     .then(user => user.getUsername().toString())

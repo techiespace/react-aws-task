@@ -6,6 +6,7 @@ export default class EventList extends Component {
         return(
             <ul className="list-group my-5">
                 <h3 className="text-capitalize text-center">Event List</h3>
+                {console.log(items)}
                 {
                     // <EventItem 
                     // key={items[0].id} 
